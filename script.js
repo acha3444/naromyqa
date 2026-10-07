@@ -30,6 +30,28 @@ document.addEventListener("DOMContentLoaded", () => {
     window.appCart = JSON.parse(localStorage.getItem('naromyqa_cart')) || [];
     const FREE_SHIPPING_THRESHOLD = 80;
     
+    // DARK MODE LOGIC
+    const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+    
+    // Initialize theme from local storage
+    const currentTheme = localStorage.getItem('naromyqa_theme');
+    if (currentTheme) {
+        document.documentElement.setAttribute('data-theme', currentTheme);
+    }
+    
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('naromyqa_theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('naromyqa_theme', 'dark');
+            }
+        });
+    }
+    
     // Protection XSS basique
     const escapeHTML = (str) => {
         if (!str) return '';
