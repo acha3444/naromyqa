@@ -912,8 +912,8 @@ a {
 }
 .account-tab.active {
     background: #f9f9f9;
-    color: var(--primary);
-    border-left: 3px solid var(--primary);
+    color: var(--text-primary);
+    border-left: 3px solid var(--text-primary);
     font-weight: 500;
 }
 .account-panel {
@@ -943,7 +943,7 @@ a {
     color: var(--text-primary);
 }
 .trust-item svg {
-    color: var(--primary);
+    color: var(--text-primary);
     width: 28px;
     height: 28px;
 }
@@ -998,7 +998,7 @@ a {
     margin: 0 0 0.2rem 0;
 }
 .sticky-product-info p {
-    color: var(--primary);
+    color: var(--text-primary);
     font-weight: bold;
     margin: 0;
 }
