@@ -1198,3 +1198,33 @@ a {
         width: 100%;
     }
 }
+
+/* Animation Swipe Hint globale */
+.swipe-hint {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .swipe-hint {
+        display: block;
+        text-align: right;
+        font-family: 'Cinzel', serif;
+        font-size: 0.75rem;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+        padding-right: 5%;
+        opacity: 0.8;
+    }
+    
+    .swipe-hint span {
+        display: inline-block;
+        animation: swipeArrow 2s infinite ease-in-out;
+    }
+    
+    @keyframes swipeArrow {
+        0%, 100% { transform: translateX(0); opacity: 0.5; }
+        50% { transform: translateX(8px); opacity: 1; }
+    }
+}
