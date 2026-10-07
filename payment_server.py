@@ -5,8 +5,15 @@ import base64
 import sqlite3
 import random
 import os
+import time
 from datetime import datetime
+import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+# Rate limiting simple en mémoire (IP -> [timestamps])
+RATE_LIMIT_DATA = {}
+RATE_LIMIT_WINDOW = 60 # 60 secondes
+RATE_LIMIT_MAX_REQUESTS = 10 # 10 requêtes par minute par IP
 
 # Chargement ultra-léger du fichier .env pour protéger les clés secrètes
 try:
@@ -18,10 +25,17 @@ try:
 except FileNotFoundError:
     pass
 
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_live_votre_cle_secrete_ici")
-KLAVIYO_PRIVATE_KEY = os.environ.get("KLAVIYO_PRIVATE_KEY", "votre_cle_api_privee_klaviyo")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+KLAVIYO_PRIVATE_KEY = os.environ.get("KLAVIYO_PRIVATE_KEY")
 SENDCLOUD_PUBLIC = os.environ.get("SENDCLOUD_PUBLIC", "votre_cle_publique_sendcloud")
 SENDCLOUD_SECRET = os.environ.get("SENDCLOUD_SECRET", "votre_cle_secrete_sendcloud")
+
+if not STRIPE_SECRET_KEY or STRIPE_SECRET_KEY == "sk_live_votre_cle_secrete_ici":
+    print("[CRITICAL] La clé STRIPE_SECRET_KEY est manquante dans l'environnement !")
+    # sys.exit(1) # Commenté pour éviter de casser le serveur de démo, mais fortement recommandé en prod
+
+if not KLAVIYO_PRIVATE_KEY or KLAVIYO_PRIVATE_KEY == "votre_cle_api_privee_klaviyo":
+    print("[WARNING] La clé KLAVIYO_PRIVATE_KEY est manquante !")
 
 def init_db():
     conn = sqlite3.connect('naromyqa_orders.db')
@@ -158,16 +172,45 @@ def create_sendcloud_parcel(order_id, email, shipping):
 
 class CORSRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
+        origin = self.headers.get('Origin', '')
+        allowed_origins = ['http://localhost:8082', 'https://naromyqa-3umj.vercel.app']
+        if origin in allowed_origins:
+            self.send_header('Access-Control-Allow-Origin', origin)
+        else:
+            self.send_header('Access-Control-Allow-Origin', 'https://naromyqa-3umj.vercel.app')
+            
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         super().end_headers()
 
     def do_OPTIONS(self):
         self.send_response(200, "ok")
         self.end_headers()
+        
+    def check_rate_limit(self):
+        client_ip = self.client_address[0]
+        now = time.time()
+        
+        if client_ip not in RATE_LIMIT_DATA:
+            RATE_LIMIT_DATA[client_ip] = []
+            
+        # Nettoyer les vieilles requêtes
+        RATE_LIMIT_DATA[client_ip] = [t for t in RATE_LIMIT_DATA[client_ip] if now - t < RATE_LIMIT_WINDOW]
+        
+        if len(RATE_LIMIT_DATA[client_ip]) >= RATE_LIMIT_MAX_REQUESTS:
+            return False
+            
+        RATE_LIMIT_DATA[client_ip].append(now)
+        return True
 
     def do_GET(self):
+        if not self.check_rate_limit():
+            self.send_response(429)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': 'Too many requests'}).encode('utf-8'))
+            return
+            
         if self.path == '/products':
             url = 'https://api.stripe.com/v1/products?active=true&expand[]=data.default_price'
             req = urllib.request.Request(url)
@@ -202,21 +245,64 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps(products).encode('utf-8'))
             except Exception as e:
-                self.send_response(400)
+                print(f"[ERROR] /products: {e}")
+                self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+                self.wfile.write(json.dumps({'error': 'Erreur interne du serveur'}).encode('utf-8'))
 
     def do_POST(self):
+        if not self.check_rate_limit():
+            self.send_response(429)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': 'Too many requests'}).encode('utf-8'))
+            return
+            
         if self.path == '/create-payment-intent':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data)
-            amount = data.get('amount', 1000)
+            cart = data.get('cart', [])
+            
+            # Recalculer le montant côté serveur pour la sécurité !
+            calculated_amount = 0
+            if not cart:
+                # Fallback non sécurisé si l'ancien frontend ne donne pas le panier
+                calculated_amount = data.get('amount', 1000)
+            else:
+                try:
+                    # Interroger Stripe pour avoir les vrais prix
+                    url_products = 'https://api.stripe.com/v1/products?active=true&expand[]=data.default_price'
+                    req_p = urllib.request.Request(url_products)
+                    auth_b64 = base64.b64encode(f"{STRIPE_SECRET_KEY}:".encode('ascii')).decode('ascii')
+                    req_p.add_header('Authorization', f'Basic {auth_b64}')
+                    resp_p = urllib.request.urlopen(req_p)
+                    stripe_data = json.loads(resp_p.read()).get('data', [])
+                    
+                    price_map = {}
+                    for p in stripe_data:
+                        price_obj = p.get('default_price')
+                        if price_obj and not isinstance(price_obj, str):
+                            price_map[p.get('name')] = price_obj.get('unit_amount', 0)
+                            
+                    for item in cart:
+                        name = item.get('name')
+                        qty = int(item.get('quantity', 1))
+                        # Prix depuis Stripe, sinon fallback à 3490 (34.90€) par défaut
+                        real_price = price_map.get(name, 3490)
+                        calculated_amount += real_price * qty
+                        
+                    # Ajouter livraison si besoin (80€ = 8000 centimes)
+                    if calculated_amount > 0 and calculated_amount < 8000:
+                        calculated_amount += 490 # Frais de port de 4.90€
+                except Exception as e:
+                    print(f"[SECURITY] Erreur de vérification des prix Stripe, fallback au prix client: {e}")
+                    calculated_amount = data.get('amount', 1000)
 
             url = 'https://api.stripe.com/v1/payment_intents'
             req_data = urllib.parse.urlencode({
-                'amount': amount,
+                'amount': calculated_amount,
                 'currency': 'eur',
                 'automatic_payment_methods[enabled]': 'true'
             }).encode('utf-8')
@@ -236,10 +322,11 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({'clientSecret': client_secret}).encode('utf-8'))
             except Exception as e:
-                self.send_response(400)
+                print(f"[ERROR] /create-payment-intent: {e}")
+                self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+                self.wfile.write(json.dumps({'error': 'Erreur interne du serveur'}).encode('utf-8'))
                 
         elif self.path == '/create-order':
             content_length = int(self.headers['Content-Length'])

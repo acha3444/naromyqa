@@ -30,6 +30,20 @@ document.addEventListener("DOMContentLoaded", () => {
     window.appCart = JSON.parse(localStorage.getItem('naromyqa_cart')) || [];
     const FREE_SHIPPING_THRESHOLD = 80;
     
+    // Protection XSS basique
+    const escapeHTML = (str) => {
+        if (!str) return '';
+        return str.replace(/[&<>'"]/g, 
+            tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag)
+        );
+    };
+    
     window.toggleCart = function(e) {
         if(e) e.preventDefault();
         const cartSidebar = document.getElementById('cart-sidebar');
@@ -101,9 +115,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const div = document.createElement('div');
             div.className = 'cart-item';
             div.innerHTML = `
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${escapeHTML(item.image)}" alt="${escapeHTML(item.name)}">
                 <div class="cart-item-details">
-                    <div class="cart-item-title" style="font-weight:600;">${item.name}</div>
+                    <div class="cart-item-title" style="font-weight:600;">${escapeHTML(item.name)}</div>
                     <div class="cart-item-price" style="margin-bottom:0.5rem;">${item.price.toFixed(2).replace('.', ',')} €</div>
                     <div class="cart-item-actions">
                         <button class="qty-btn" onclick="window.changeQty(${i}, -1)">-</button>

@@ -426,7 +426,7 @@
                     const response = await fetch('https://naromyqa-backend.onrender.com/create-payment-intent', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ amount: Math.round(total * 100) })
+                        body: JSON.stringify({ amount: Math.round(total * 100), cart: window.appCart })
                     });
 
                     if (!response.ok) throw new Error("Erreur de connexion avec la banque.");
