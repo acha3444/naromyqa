@@ -311,6 +311,9 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     init_db()
-    server = HTTPServer(('localhost', 8083), CORSRequestHandler)
-    print("Backend de paiement + Klaviyo + Base de données démarré sur http://localhost:8083 ...")
+    # Render (et autres hébergeurs) utilise la variable d'environnement PORT
+    port = int(os.environ.get('PORT', 8083))
+    # Il faut absolument écouter sur '0.0.0.0' (toutes les adresses) et non pas 'localhost' pour le cloud
+    server = HTTPServer(('0.0.0.0', port), CORSRequestHandler)
+    print(f"Backend de paiement + Klaviyo + Base de données démarré sur le port {port} ...")
     server.serve_forever()
