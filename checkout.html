@@ -11,8 +11,8 @@
     <script src="theme.js"></script>
     <style>
         body {
-            background-color: #fdfdfc;
-            color: #1a1a1a;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
             font-family: 'Lato', sans-serif;
             margin: 0;
             padding: 0;
@@ -27,7 +27,7 @@
             font-family: 'Cinzel', serif;
             font-size: 2.8rem;
             text-decoration: none;
-            color: #1a1a1a;
+            color: var(--text-primary);
             letter-spacing: 6px;
         }
         .secure-badge {
@@ -70,12 +70,12 @@
         .luxury-input {
             width: 100%;
             border: none;
-            border-bottom: 1px solid #ccc;
+            border-bottom: 1px solid var(--border);
             background: transparent;
             padding: 12px 0;
             font-family: 'Lato', sans-serif;
             font-size: 1.05rem;
-            color: #1a1a1a;
+            color: var(--text-primary);
             outline: none;
             transition: border-color 0.4s ease;
             margin-bottom: 2rem;
@@ -83,7 +83,7 @@
             -webkit-appearance: none;
         }
         .luxury-input:focus {
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid var(--text-primary);
         }
         .luxury-input::placeholder {
             color: #999;
@@ -114,7 +114,7 @@
             letter-spacing: 0.5px;
         }
         .luxury-checkbox-label input {
-            accent-color: #1a1a1a;
+            accent-color: var(--text-primary);
             width: 16px;
             height: 16px;
             border: 1px solid #ccc;
@@ -136,7 +136,7 @@
             margin-top: 1rem;
         }
         #card-element {
-            border-bottom: 1px solid #ccc;
+            border-bottom: 1px solid var(--border);
             padding: 12px 0;
             margin-bottom: 0.5rem;
             transition: border-color 0.4s ease;
@@ -167,7 +167,7 @@
             font-size: 1.1rem;
             margin: 0 0 0.8rem 0;
             letter-spacing: 1px;
-            color: #1a1a1a;
+            color: var(--text-primary);
         }
         .summary-item-price {
             font-weight: 300;
@@ -186,7 +186,7 @@
         .totals-row.grand-total {
             font-family: 'Cinzel', serif;
             font-size: 1.6rem;
-            color: #1a1a1a;
+            color: var(--text-primary);
             margin-top: 2rem;
             padding-top: 2rem;
             border-top: 1px solid rgba(0,0,0,0.1);
@@ -195,9 +195,9 @@
         /* Bouton Finalisation (Couture style) */
         .btn-luxury {
             width: 100%;
-            background: #1a1a1a;
-            color: white;
-            border: 1px solid #1a1a1a;
+            background: var(--text-primary);
+            color: var(--surface);
+            border: 1px solid var(--text-primary);
             padding: 1.4rem;
             font-family: 'Cinzel', serif;
             font-size: 1.1rem;
@@ -211,12 +211,12 @@
             gap: 12px;
         }
         .btn-luxury:hover {
-            background: #fff;
-            color: #1a1a1a;
+            background: var(--surface);
+            color: var(--text-primary);
         }
         .btn-luxury:disabled {
-            background: #eee;
-            border-color: #eee;
+            background: var(--bg-color);
+            border-color: var(--border);
             color: #aaa;
             cursor: not-allowed;
         }
@@ -319,7 +319,7 @@
             </button>
             
             <div style="margin-top: 2rem; opacity: 0.5; text-align: center; font-size: 0.8rem; line-height: 1.6; letter-spacing: 0.5px;">
-                En validant votre commande, vous acceptez nos <br><a href="#" style="color: #1a1a1a;">Conditions Générales de Vente</a>.
+                En validant votre commande, vous acceptez nos <br><a href="#" style="color: var(--text-primary);">Conditions Générales de Vente</a>.
             </div>
         </div>
 
@@ -363,7 +363,7 @@
                         <div class="summary-item">
                             <div style="position: relative;">
                                 <img src="${item.image}" alt="${item.name}">
-                                <span style="position: absolute; top: -12px; right: -12px; background: #1a1a1a; color: white; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border-radius: 50%; font-family: 'Lato', sans-serif;">${item.quantity}</span>
+                                <span style="position: absolute; top: -12px; right: -12px; background: var(--text-primary); color: var(--surface); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border-radius: 50%; font-family: 'Lato', sans-serif;">${item.quantity}</span>
                             </div>
                             <div class="summary-item-details">
                                 <h4 class="summary-item-title">${item.name}</h4>
@@ -483,14 +483,14 @@
 
                         localStorage.removeItem('naromyqa_cart');
                         document.body.innerHTML = `
-                            <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #fdfdfc; padding: 2rem;">
-                                <h1 style="font-family: 'Cinzel', serif; font-size: 3.5rem; margin-bottom: 1.5rem; color: #1a1a1a; letter-spacing: 5px;">NAROMYQA</h1>
-                                <div style="width: 40px; height: 1px; background: #1a1a1a; margin-bottom: 2.5rem;"></div>
+                            <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--bg-color); padding: 2rem;">
+                                <h1 style="font-family: 'Cinzel', serif; font-size: 3.5rem; margin-bottom: 1.5rem; color: var(--text-primary); letter-spacing: 5px;">NAROMYQA</h1>
+                                <div style="width: 40px; height: 1px; background: var(--text-primary); margin-bottom: 2.5rem;"></div>
                                 <p style="font-family: 'Cinzel', serif; font-size: 1.6rem; color: #333; margin-bottom: 1.5rem; letter-spacing: 1px;">Votre commande est confirmée.</p>
                                 <p style="font-family: 'Cinzel', serif; font-size: 1.2rem; margin-bottom: 1rem;">N° de suivi : <strong>${orderId}</strong></p>
                                 <p style="color: #555; margin-bottom: 4rem; font-size: 1.1rem; max-width: 550px; line-height: 1.8; font-family: 'Lato', sans-serif;">Nous avons bien reçu votre paiement de ${(total).toFixed(2)}€. <br>Un e-mail de confirmation détaillé vous a été envoyé.</p>
                                 <div style="display: flex; gap: 1rem;">
-                                    <a href="suivi.html" class="btn-luxury" style="display: inline-flex; width: auto; padding: 15px 30px; background: white; color: #1a1a1a;">Suivre ma commande</a>
+                                    <a href="suivi.html" class="btn-luxury" style="display: inline-flex; width: auto; padding: 15px 30px;">Suivre ma commande</a>
                                     <a href="index.html" class="btn-luxury" style="display: inline-flex; width: auto; padding: 15px 30px;">Retour boutique</a>
                                 </div>
                             </div>

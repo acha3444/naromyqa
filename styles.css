@@ -6,6 +6,11 @@
     --accent-hover: #6a573f;
     --surface: #ffffff;
     --border: #e6dfd7;
+    --navbar-bg: rgba(253, 250, 246, 0.9);
+    --mobile-nav-bg: rgba(255, 255, 255, 0.95);
+    --progress-bg: #e0e0e0;
+    --tab-hover-bg: #fafafa;
+    --shipping-bar-bg: #fdfbf7;
 }
 
 * {
@@ -50,7 +55,7 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(253, 250, 246, 0.9);
+    background: var(--navbar-bg);
     backdrop-filter: blur(10px);
     z-index: 1000;
     border-bottom: 1px solid var(--border);
@@ -82,7 +87,7 @@ a {
 /* Buttons */
 .btn-primary {
     background: var(--accent);
-    color: #fff;
+    color: var(--bg-color);
     padding: 0.8rem 2rem;
     font-family: 'Lato', sans-serif;
     font-weight: 400;
@@ -113,7 +118,7 @@ a {
 
 .btn-secondary:hover {
     background: var(--accent);
-    color: #fff;
+    color: var(--bg-color);
 }
 
 /* Hero Section */
@@ -677,7 +682,7 @@ a {
 
 .shipping-bar-container {
     padding: 1rem 2rem;
-    background: #fdfbf7;
+    background: var(--shipping-bar-bg);
     border-bottom: 1px solid var(--border);
 }
 
@@ -690,7 +695,7 @@ a {
 
 .shipping-progress {
     height: 4px;
-    background: #e0e0e0;
+    background: var(--progress-bg);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -902,7 +907,7 @@ a {
     border-left: 3px solid transparent;
 }
 .account-tab:hover {
-    background: #fafafa;
+    background: var(--tab-hover-bg);
     color: var(--text-primary);
 }
 .account-tab.active {
@@ -961,9 +966,9 @@ a {
     bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--mobile-nav-bg);
     backdrop-filter: blur(10px);
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border);
     box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
     padding: 1rem 5%;
     display: flex;
@@ -1248,6 +1253,11 @@ a {
     --accent-hover: #f0e6d2;
     --surface: #1e1e1e;
     --border: #333333;
+    --navbar-bg: rgba(18, 18, 18, 0.9);
+    --mobile-nav-bg: rgba(30, 30, 30, 0.95);
+    --progress-bg: #444444;
+    --tab-hover-bg: #2a2a2a;
+    --shipping-bar-bg: #1e1e1e;
 }
 
 body {
