@@ -3,20 +3,25 @@ import urllib.parse
 import json
 import base64
 import sqlite3
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from http.server import HTTPServer, SimpleHTTPRequestHandler
 import random
 import os
+from datetime import datetime
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+
+# Chargement ultra-léger du fichier .env pour protéger les clés secrètes
+try:
+    with open('.env', 'r') as f:
+        for line in f:
+            if '=' in line and not line.startswith('#'):
+                k, v = line.strip().split('=', 1)
+                os.environ[k] = v
+except FileNotFoundError:
+    pass
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_live_votre_cle_secrete_ici")
-
-# --- CONFIGURATION MAILING (KLAVIYO) ---
-# Vous avez fait le choix royal pour l'e-commerce !
-# 1. Créez votre compte sur Klaviyo.com
-# 2. Allez dans Settings > API Keys et créez une Private API Key
-KLAVIYO_PRIVATE_KEY = "votre_cle_api_privee_klaviyo"
+KLAVIYO_PRIVATE_KEY = os.environ.get("KLAVIYO_PRIVATE_KEY", "votre_cle_api_privee_klaviyo")
+SENDCLOUD_PUBLIC = os.environ.get("SENDCLOUD_PUBLIC", "votre_cle_publique_sendcloud")
+SENDCLOUD_SECRET = os.environ.get("SENDCLOUD_SECRET", "votre_cle_secrete_sendcloud")
 
 def init_db():
     conn = sqlite3.connect('naromyqa_orders.db')
@@ -32,7 +37,6 @@ def send_confirmation_email(order_id, user_email, amount):
         print(f"[KLAVIYO] Simulation: Événement 'Placed Order' théorique envoyé pour {user_email} (Commande {order_id})")
         return
     
-    # Appel de l'API REST officielle de Klaviyo (v3) pour déclencher votre Flux d'e-mail
     try:
         url = 'https://a.klaviyo.com/api/events/'
         payload = {
@@ -40,10 +44,20 @@ def send_confirmation_email(order_id, user_email, amount):
                 "type": "event",
                 "attributes": {
                     "profile": {
-                        "email": user_email
+                        "data": {
+                            "type": "profile",
+                            "attributes": {
+                                "email": user_email
+                            }
+                        }
                     },
                     "metric": {
-                        "name": "Placed Order"
+                        "data": {
+                            "type": "metric",
+                            "attributes": {
+                                "name": "Placed Order"
+                            }
+                        }
                     },
                     "properties": {
                         "OrderId": order_id,
@@ -63,6 +77,39 @@ def send_confirmation_email(order_id, user_email, amount):
         print(f"[KLAVIYO] Succès: Événement 'Placed Order' envoyé pour {user_email}. Le mail va partir via votre flux Klaviyo !")
     except Exception as e:
         print(f"[KLAVIYO] Erreur lors de l'envoi à Klaviyo: {e}")
+
+def create_sendcloud_parcel(order_id, email, shipping):
+    if SENDCLOUD_PUBLIC == "votre_cle_publique_sendcloud":
+        print(f"[SENDCLOUD] ⚠️ Colis non créé: Identifiants Sendcloud manquants.")
+        return
+        
+    try:
+        url = 'https://panel.sendcloud.sc/api/v2/parcels'
+        payload = {
+            "parcel": {
+                "name": f"{shipping.get('first_name', '')} {shipping.get('last_name', '')}",
+                "address": shipping.get('address', ''),
+                "house_number": shipping.get('apartment', ' '), # Sendcloud requires something here usually, or parses it
+                "city": shipping.get('city', ''),
+                "postal_code": shipping.get('postal_code', ''),
+                "country": shipping.get('country', 'FR'),
+                "telephone": shipping.get('phone', ''),
+                "email": email,
+                "order_number": order_id,
+                "request_label": False
+            }
+        }
+        
+        req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'))
+        auth_str = f"{SENDCLOUD_PUBLIC}:{SENDCLOUD_SECRET}"
+        auth_b64 = base64.b64encode(auth_str.encode('ascii')).decode('ascii')
+        req.add_header('Authorization', f'Basic {auth_b64}')
+        req.add_header('Content-Type', 'application/json')
+        
+        urllib.request.urlopen(req)
+        print(f"[SENDCLOUD] Succès: Commande {order_id} transmise à Sendcloud pour expédition.")
+    except Exception as e:
+        print(f"[SENDCLOUD] Erreur lors de la création du colis: {e}")
 
 class CORSRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -110,7 +157,6 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
                 
         elif self.path == '/create-order':
-            # Endpoint appelé APRÈS le succès du paiement Stripe
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data)
@@ -119,18 +165,19 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
             email = data.get('email', '')
             amount = data.get('amount', 0)
             items = json.dumps(data.get('items', []))
+            shipping = data.get('shipping', {})
             date_str = datetime.now().strftime("%d/%m/%Y")
             
-            # Enregistrement dans la vraie base de données locale (SQLite)
             conn = sqlite3.connect('naromyqa_orders.db')
             c = conn.cursor()
             c.execute("INSERT INTO orders (id, email, status, amount, date, items) VALUES (?, ?, ?, ?, ?, ?)",
-                      (order_id, email, 1, amount, date_str, items)) # Status 1 = Confirmée
+                      (order_id, email, 1, amount, date_str, items))
             conn.commit()
             conn.close()
             
-            # Déclenchement de l'email
+            # Déclencheurs Asynchrones/Externes
             send_confirmation_email(order_id, email, amount)
+            create_sendcloud_parcel(order_id, email, shipping)
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -138,7 +185,6 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({'orderId': order_id}).encode('utf-8'))
             
         elif self.path == '/track-order':
-            # Endpoint pour la page suivi.html
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data)
@@ -166,5 +212,5 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     init_db()
     server = HTTPServer(('localhost', 8083), CORSRequestHandler)
-    print("Backend de paiement + Mailing + Base de données démarré sur http://localhost:8083 ...")
+    print("Backend de paiement + Klaviyo + Base de données démarré sur http://localhost:8083 ...")
     server.serve_forever()

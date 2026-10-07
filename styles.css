@@ -1062,3 +1062,107 @@ a {
     margin-bottom: 1rem;
     font-size: 0.9rem;
 }
+
+/* ========================================================= */
+/* --- OPTIMISATIONS MOBILES INTENSIVES (SMARTPHONE) --- */
+/* ========================================================= */
+@media (max-width: 768px) {
+    /* Navbar plus compacte */
+    .navbar {
+        padding: 1rem 5%;
+    }
+    .logo {
+        font-size: 1.4rem;
+    }
+    .nav-links {
+        gap: 1rem;
+    }
+    .nav-links a {
+        font-size: 0.8rem;
+    }
+
+    /* Hero Section : Moins de scroll, image visible de suite */
+    .hero {
+        min-height: auto;
+        padding: 6rem 5% 3rem;
+    }
+    .hero-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    .hero-subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+    .hero-image {
+        max-height: 50vh; /* L'image ne prend que la moitié de l'écran maximum */
+    }
+
+    /* Sections générales : réduire les gros espaces (paddings) */
+    .features, .collection, .product-detail-container {
+        padding: 3rem 5%;
+    }
+    .section-header {
+        margin-bottom: 2rem;
+    }
+    .section-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    /* Trust Bar (La barre de réassurance) */
+    .trust-bar {
+        gap: 1.5rem;
+        padding: 1.5rem 5%;
+        flex-direction: column; /* Aligner proprement sur mobile */
+        text-align: center;
+    }
+    .trust-item {
+        flex-direction: column; /* Icône au dessus du texte */
+        gap: 0.5rem;
+    }
+
+    /* Page Produit */
+    .product-detail-container {
+        padding-top: 6rem;
+    }
+    .product-info-panel h1 {
+        font-size: 2rem;
+    }
+    .product-gallery img {
+        max-height: 60vh;
+    }
+    .add-to-cart-wrapper {
+        flex-direction: column; /* Le bouton Ajout Panier prend toute la largeur */
+    }
+    .qty-selector {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    /* Panier & Checkout */
+    .cart-drawer {
+        width: 100%; /* Le panier prend tout l'écran sur mobile */
+    }
+    .checkout-container {
+        padding: 5rem 5% 2rem;
+    }
+    .checkout-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    /* Barre d'ajout au panier flottante */
+    .sticky-cart-bar {
+        padding: 0.8rem 5%;
+        flex-direction: column;
+        gap: 0.8rem;
+        text-align: center;
+    }
+    .sticky-product-info {
+        justify-content: center;
+    }
+    .sticky-add-btn {
+        width: 100%;
+    }
+}

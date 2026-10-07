@@ -448,16 +448,32 @@
                         document.getElementById('card-errors').textContent = error.message;
                         payBtn.innerHTML = 'VALIDER LE PAIEMENT - ' + formattedTotal;
                     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-                        // Paiement Réussi, on contacte le backend pour sauvegarder la commande et envoyer l'email !
+                        // Paiement Réussi, on contacte le backend pour sauvegarder la commande, Klaviyo et Sendcloud !
                         const userEmail = document.querySelector('input[type="email"]').value || 'client@email.com';
+                        const country = document.querySelector('select').value;
+                        const inputs = document.querySelectorAll('input[type="text"]');
+                        const phone = document.querySelector('input[type="tel"]').value;
                         
+                        // inputs: 0=Prénom, 1=Nom, 2=Adresse, 3=Appartement, 4=Code postal, 5=Ville, 6=Titulaire carte
+                        const shippingInfo = {
+                            first_name: inputs[0] ? inputs[0].value : '',
+                            last_name: inputs[1] ? inputs[1].value : '',
+                            address: inputs[2] ? inputs[2].value : '',
+                            apartment: inputs[3] ? inputs[3].value : '',
+                            postal_code: inputs[4] ? inputs[4].value : '',
+                            city: inputs[5] ? inputs[5].value : '',
+                            country: country,
+                            phone: phone
+                        };
+
                         const orderResponse = await fetch('http://localhost:8083/create-order', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 email: userEmail,
                                 amount: total,
-                                items: cart
+                                items: cart,
+                                shipping: shippingInfo
                             })
                         });
                         
