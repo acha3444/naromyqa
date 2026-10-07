@@ -1109,16 +1109,48 @@ a {
         font-size: 1.8rem;
     }
     
-    /* Trust Bar (La barre de réassurance) */
+    /* Trust Bar (La barre de réassurance) - Scroll Horizontal sur Mobile */
     .trust-bar {
         gap: 1.5rem;
         padding: 1.5rem 5%;
-        flex-direction: column; /* Aligner proprement sur mobile */
-        text-align: center;
+        flex-direction: row; /* On force sur la même ligne */
+        flex-wrap: nowrap;
+        overflow-x: auto; /* Permet le scroll horizontal */
+        scroll-snap-type: x mandatory; /* Effet aimant doux */
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start; /* Aligné à gauche pour scroller vers la droite */
+        scrollbar-width: none; /* Cache la barre de défilement (Firefox) */
+    }
+    .trust-bar::-webkit-scrollbar {
+        display: none; /* Cache la barre de défilement (Chrome/Safari) */
     }
     .trust-item {
-        flex-direction: column; /* Icône au dessus du texte */
+        flex: 0 0 70%; /* Chaque icône prend 70% de l'écran, invitant à scroller */
+        scroll-snap-align: start;
+        flex-direction: column;
         gap: 0.5rem;
+        text-align: center;
+    }
+
+    /* Grille de Features et Galerie - Scroll Horizontal sur Mobile */
+    .features-grid, .gallery-grid {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 1.5rem;
+        padding-bottom: 1rem;
+    }
+    .features-grid::-webkit-scrollbar, .gallery-grid::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .feature-card, .gallery-item {
+        flex: 0 0 85%; /* Chaque carte/image prend 85% de l'écran */
+        scroll-snap-align: center;
     }
 
     /* Page Produit */
