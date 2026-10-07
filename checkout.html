@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement Sécurisé | Naromyqa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Intégration de l'API officielle Stripe Elements -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            background-color: #fdfdfc;
+            color: #1a1a1a;
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* En-tête de Luxe Minimaliste */
+        .checkout-header {
+            text-align: center;
+            padding: 3.5rem 1rem 2rem;
+        }
+        .checkout-header .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 2.8rem;
+            text-decoration: none;
+            color: #1a1a1a;
+            letter-spacing: 6px;
+        }
+        .secure-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #555;
+            margin-top: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Disposition */
+        .luxury-checkout-container {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 2rem 5% 5rem;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 6rem;
+        }
+
+        /* Titres de sections */
+        .checkout-section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            margin-bottom: 2.5rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            text-transform: uppercase;
+        }
+        
+        /* Champs de saisie - Style Maison de Couture */
+        .luxury-input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            background: transparent;
+            padding: 12px 0;
+            font-family: 'Lato', sans-serif;
+            font-size: 1.05rem;
+            color: #1a1a1a;
+            outline: none;
+            transition: border-color 0.4s ease;
+            margin-bottom: 2rem;
+            border-radius: 0;
+            -webkit-appearance: none;
+        }
+        .luxury-input:focus {
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .luxury-input::placeholder {
+            color: #999;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        
+        select.luxury-input {
+            cursor: pointer;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Checkbox discrète */
+        .luxury-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: #555;
+            cursor: pointer;
+            margin-top: -1rem;
+            margin-bottom: 2.5rem;
+            letter-spacing: 0.5px;
+        }
+        .luxury-checkbox-label input {
+            accent-color: #1a1a1a;
+            width: 16px;
+            height: 16px;
+            border: 1px solid #ccc;
+        }
+
+        /* Bloc de paiement Stripe */
+        .payment-method-box {
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        .payment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .stripe-container {
+            margin-top: 1rem;
+        }
+        #card-element {
+            border-bottom: 1px solid #ccc;
+            padding: 12px 0;
+            margin-bottom: 0.5rem;
+            transition: border-color 0.4s ease;
+        }
+        
+        /* Résumé de commande élégant */
+        .summary-block {
+            position: sticky;
+            top: 3rem;
+        }
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .summary-item img {
+            width: 90px;
+            height: 120px;
+            object-fit: cover;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .summary-item-details {
+            flex: 1;
+        }
+        .summary-item-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            margin: 0 0 0.8rem 0;
+            letter-spacing: 1px;
+            color: #1a1a1a;
+        }
+        .summary-item-price {
+            font-weight: 300;
+            color: #555;
+            letter-spacing: 1px;
+        }
+        
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+            color: #555;
+            font-weight: 300;
+        }
+        .totals-row.grand-total {
+            font-family: 'Cinzel', serif;
+            font-size: 1.6rem;
+            color: #1a1a1a;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Bouton Finalisation (Couture style) */
+        .btn-luxury {
+            width: 100%;
+            background: #1a1a1a;
+            color: white;
+            border: 1px solid #1a1a1a;
+            padding: 1.4rem;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            margin-top: 3rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-luxury:hover {
+            background: #fff;
+            color: #1a1a1a;
+        }
+        .btn-luxury:disabled {
+            background: #eee;
+            border-color: #eee;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* Mobile */
+        @media(max-width: 950px) {
+            .luxury-checkout-container {
+                grid-template-columns: 1fr;
+                gap: 4rem;
+                padding: 1rem 5% 5rem;
+            }
+            .summary-block {
+                order: -1; /* Place le résumé en haut sur mobile */
+                position: relative;
+                top: 0;
+                border-bottom: 1px solid rgba(0,0,0,0.1);
+                padding-bottom: 3rem;
+            }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <header class="checkout-header">
+        <a href="index.html" class="logo">NAROMYQA</a>
+        <br>
+        <div class="secure-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Paiement Crypté 256-bit
+        </div>
+    </header>
+
+    <div class="luxury-checkout-container">
+        <!-- Colonne Gauche : Formulaires -->
+        <div>
+            <div class="checkout-section-title">
+                Coordonnées
+                <a href="login.html" style="font-family: 'Lato', sans-serif; font-size: 0.85rem; color: #555; text-decoration: underline; letter-spacing: 0.5px; text-transform: none;">Se connecter</a>
+            </div>
+            
+            <input type="email" class="luxury-input" placeholder="Adresse e-mail" required>
+            
+            <label class="luxury-checkbox-label">
+                <input type="checkbox" checked>
+                Recevoir nos actualités et invitations privées
+            </label>
+
+            <div class="checkout-section-title" style="margin-top: 4rem;">
+                Livraison
+            </div>
+            
+            <select class="luxury-input">
+                <option value="FR">France</option>
+                <option value="BE">Belgique</option>
+                <option value="CH">Suisse</option>
+                <option value="CA">Canada</option>
+            </select>
+
+            <div class="grid-2">
+                <input type="text" class="luxury-input" placeholder="Prénom" required>
+                <input type="text" class="luxury-input" placeholder="Nom" required>
+            </div>
+            
+            <input type="text" class="luxury-input" placeholder="Adresse" required>
+            <input type="text" class="luxury-input" placeholder="Appartement, suite, bâtiment (optionnel)">
+            
+            <div class="grid-2">
+                <input type="text" class="luxury-input" placeholder="Code postal" required>
+                <input type="text" class="luxury-input" placeholder="Ville" required>
+            </div>
+            
+            <input type="tel" class="luxury-input" placeholder="Téléphone" required>
+
+            <div class="checkout-section-title" style="margin-top: 4rem;">
+                Paiement
+            </div>
+
+            <div class="payment-method-box">
+                <div class="payment-header">
+                    <span style="font-family: 'Cinzel', serif; font-size: 1.1rem; letter-spacing: 1px;">Carte Bancaire</span>
+                    <div style="display: flex; gap: 12px; opacity: 0.5;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1200px-Mastercard-logo.svg.png" height="14" alt="Mastercard">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/1200px-Visa_Inc._logo.svg.png" height="14" alt="Visa">
+                    </div>
+                </div>
+                
+                <div class="stripe-container">
+                    <input type="text" id="card-name" class="luxury-input" placeholder="Titulaire de la carte" required>
+                    
+                    <!-- Stripe Element -->
+                    <div id="card-element"></div>
+                    <div id="card-errors" role="alert" style="color: #8b0000; margin-top: 1rem; font-size: 0.9rem; font-weight: 400; letter-spacing: 0.5px;"></div>
+                </div>
+            </div>
+
+            <button class="btn-luxury" id="pay-button">
+                VALIDER LE PAIEMENT 
+                <span id="pay-total-btn" style="margin-left: 8px;"></span>
+            </button>
+            
+            <div style="margin-top: 2rem; opacity: 0.5; text-align: center; font-size: 0.8rem; line-height: 1.6; letter-spacing: 0.5px;">
+                En validant votre commande, vous acceptez nos <br><a href="#" style="color: #1a1a1a;">Conditions Générales de Vente</a>.
+            </div>
+        </div>
+
+        <!-- Colonne Droite : Résumé de Commande -->
+        <div class="summary-block">
+            <h3 style="font-family: 'Cinzel', serif; font-size: 1.3rem; margin-bottom: 2.5rem; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 1rem;">Votre Commande</h3>
+            
+            <div id="checkout-items" style="margin-bottom: 3rem;">
+                <!-- Rempli par le Javascript -->
+            </div>
+
+            <div class="totals-row">
+                <span>Sous-total</span>
+                <span id="checkout-subtotal">0,00 €</span>
+            </div>
+            <div class="totals-row">
+                <span>Expédition</span>
+                <span id="checkout-shipping">Offerte</span>
+            </div>
+            <div class="totals-row grand-total">
+                <span>TOTAL</span>
+                <span id="checkout-total">0,00 €</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de logique -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cart = JSON.parse(localStorage.getItem('naromyqa_cart')) || [];
+            const container = document.getElementById('checkout-items');
+            let total = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">Votre panier est vide.</p>';
+                document.getElementById('pay-button').disabled = true;
+            } else {
+                cart.forEach(item => {
+                    total += item.price * item.quantity;
+                    container.innerHTML += `
+                        <div class="summary-item">
+                            <div style="position: relative;">
+                                <img src="${item.image}" alt="${item.name}">
+                                <span style="position: absolute; top: -12px; right: -12px; background: #1a1a1a; color: white; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border-radius: 50%; font-family: 'Lato', sans-serif;">${item.quantity}</span>
+                            </div>
+                            <div class="summary-item-details">
+                                <h4 class="summary-item-title">${item.name}</h4>
+                                <div class="summary-item-price">${(item.price * item.quantity).toFixed(2).replace('.', ',')} €</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            const formattedTotal = total.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('checkout-subtotal').textContent = formattedTotal;
+            document.getElementById('checkout-total').textContent = formattedTotal;
+            document.getElementById('pay-total-btn').textContent = '- ' + formattedTotal;
+
+            // STRIPE INTEGRATION (LIVE)
+            const stripe = Stripe('pk_live_51UNv3GQd4md58wk3scdoKwm7SgmMBPjEzvnpdhxu9RVCp0tzWM7AjX9CQSMmhQIbcVrAMAC5W5owirwu0tJPTQCL00dA178Mao');
+            const elements = stripe.elements();
+            
+            // Le style du champ Carte pour matcher le design Minimaliste
+            const card = elements.create('card', {
+                style: {
+                    base: {
+                        color: '#1a1a1a',
+                        fontFamily: '"Lato", sans-serif',
+                        fontSmoothing: 'antialiased',
+                        fontSize: '17px',
+                        '::placeholder': { color: '#999', letterSpacing: '0.5px' },
+                        iconColor: '#1a1a1a'
+                    },
+                    invalid: {
+                        color: '#8b0000',
+                        iconColor: '#8b0000'
+                    }
+                }
+            });
+            card.mount('#card-element');
+
+            // Affichage des erreurs avec élégance
+            card.on('change', function(event) {
+                const displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                    document.getElementById('card-element').style.borderBottomColor = '#8b0000';
+                } else {
+                    displayError.textContent = '';
+                    document.getElementById('card-element').style.borderBottomColor = '#ccc';
+                }
+            });
+
+            // Action de paiement
+            const payBtn = document.getElementById('pay-button');
+            payBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if(cart.length === 0) return;
+                
+                payBtn.innerHTML = '<div style="width: 24px; height: 24px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>';
+                
+                try {
+                    // Contact avec le backend Python
+                    const response = await fetch('http://localhost:8083/create-payment-intent', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: Math.round(total * 100) })
+                    });
+
+                    if (!response.ok) throw new Error("Erreur de connexion avec la banque.");
+                    
+                    const data = await response.json();
+                    const clientSecret = data.clientSecret;
+
+                    // Confirmation de paiement Stripe
+                    const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+                        payment_method: {
+                            card: card,
+                            billing_details: {
+                                name: document.getElementById('card-name').value || 'Client'
+                            }
+                        }
+                    });
+
+                    if (error) {
+                        document.getElementById('card-errors').textContent = error.message;
+                        payBtn.innerHTML = 'VALIDER LE PAIEMENT - ' + formattedTotal;
+                    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+                        // Paiement Réussi, on contacte le backend pour sauvegarder la commande et envoyer l'email !
+                        const userEmail = document.querySelector('input[type="email"]').value || 'client@email.com';
+                        
+                        const orderResponse = await fetch('http://localhost:8083/create-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: userEmail,
+                                amount: total,
+                                items: cart
+                            })
+                        });
+                        
+                        const orderData = await orderResponse.json();
+                        const orderId = orderData.orderId;
+
+                        localStorage.removeItem('naromyqa_cart');
+                        document.body.innerHTML = `
+                            <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #fdfdfc; padding: 2rem;">
+                                <h1 style="font-family: 'Cinzel', serif; font-size: 3.5rem; margin-bottom: 1.5rem; color: #1a1a1a; letter-spacing: 5px;">NAROMYQA</h1>
+                                <div style="width: 40px; height: 1px; background: #1a1a1a; margin-bottom: 2.5rem;"></div>
+                                <p style="font-family: 'Cinzel', serif; font-size: 1.6rem; color: #333; margin-bottom: 1.5rem; letter-spacing: 1px;">Votre commande est confirmée.</p>
+                                <p style="font-family: 'Cinzel', serif; font-size: 1.2rem; margin-bottom: 1rem;">N° de suivi : <strong>${orderId}</strong></p>
+                                <p style="color: #555; margin-bottom: 4rem; font-size: 1.1rem; max-width: 550px; line-height: 1.8; font-family: 'Lato', sans-serif;">Nous avons bien reçu votre paiement de ${(total).toFixed(2)}€. <br>Un e-mail de confirmation détaillé vous a été envoyé.</p>
+                                <div style="display: flex; gap: 1rem;">
+                                    <a href="suivi.html" class="btn-luxury" style="display: inline-flex; width: auto; padding: 15px 30px; background: white; color: #1a1a1a;">Suivre ma commande</a>
+                                    <a href="index.html" class="btn-luxury" style="display: inline-flex; width: auto; padding: 15px 30px;">Retour boutique</a>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('card-errors').textContent = "Une erreur est survenue lors de la communication bancaire.";
+                    payBtn.innerHTML = 'VALIDER LE PAIEMENT - ' + formattedTotal;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

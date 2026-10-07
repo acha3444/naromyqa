@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi de Commande | Naromyqa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: #fdfdfc;
+            color: #1a1a1a;
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Minimal Header */
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            background: white;
+        }
+        header .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            text-decoration: none;
+            color: #1a1a1a;
+            letter-spacing: 5px;
+        }
+
+        /* Container */
+        .tracking-container {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            letter-spacing: 2px;
+        }
+
+        /* Search Form */
+        .search-box {
+            background: white;
+            padding: 3rem;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            margin-bottom: 3rem;
+        }
+        .luxury-input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            background: transparent;
+            padding: 12px 0;
+            font-family: 'Lato', sans-serif;
+            font-size: 1.05rem;
+            color: #1a1a1a;
+            outline: none;
+            transition: border-color 0.4s ease;
+            margin-bottom: 2rem;
+            border-radius: 0;
+        }
+        .luxury-input:focus {
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .btn-luxury {
+            width: 100%;
+            background: #1a1a1a;
+            color: white;
+            border: 1px solid #1a1a1a;
+            padding: 1.2rem;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-luxury:hover {
+            background: white;
+            color: #1a1a1a;
+        }
+
+        /* Results Area */
+        #tracking-result {
+            display: none;
+            background: white;
+            padding: 3rem;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+
+        .order-meta {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .order-meta div {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .meta-label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .meta-value {
+            font-size: 1.1rem;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+        }
+
+        /* Stepper (Timeline) */
+        .timeline {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 24px;
+            width: 2px;
+            background: #eee;
+        }
+        
+        .step {
+            position: relative;
+            padding-left: 70px;
+            margin-bottom: 3rem;
+        }
+        .step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-icon {
+            position: absolute;
+            left: 0;
+            top: -5px;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            z-index: 2;
+            transition: all 0.4s ease;
+        }
+        
+        .step.active .step-icon {
+            border-color: #1a1a1a;
+            color: #1a1a1a;
+        }
+        
+        .step.completed .step-icon {
+            background: #1a1a1a;
+            border-color: #1a1a1a;
+            color: white;
+        }
+
+        .step-content h3 {
+            margin: 0 0 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: #aaa;
+        }
+        .step.active .step-content h3, .step.completed .step-content h3 {
+            color: #1a1a1a;
+        }
+        
+        .step-content p {
+            margin: 0;
+            color: #888;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        @media(max-width: 600px) {
+            .search-box, #tracking-result { padding: 2rem; }
+            .timeline::before { left: 19px; }
+            .step { padding-left: 60px; }
+            .step-icon { width: 40px; height: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">NAROMYQA</a>
+    </header>
+
+    <div class="tracking-container">
+        <h1>Suivi de Commande</h1>
+        
+        <div class="search-box">
+            <input type="text" id="order-id" class="luxury-input" placeholder="Numéro de commande (ex: NRM-12345)" required>
+            <input type="email" id="order-email" class="luxury-input" placeholder="Adresse e-mail utilisée lors de l'achat" required>
+            <button class="btn-luxury" onclick="trackOrder()">
+                SUIVRE MA COMMANDE
+            </button>
+            <div id="error-msg" style="color: #8b0000; margin-top: 1rem; display: none; text-align: center;">Numéro de commande introuvable ou e-mail incorrect.</div>
+        </div>
+
+        <div id="tracking-result">
+            <div class="order-meta">
+                <div>
+                    <span class="meta-label">Commande</span>
+                    <span class="meta-value" id="res-id">#NRM-XXXXX</span>
+                </div>
+                <div style="text-align: right;">
+                    <span class="meta-label">Date</span>
+                    <span class="meta-value" id="res-date">--/--/----</span>
+                </div>
+            </div>
+
+            <div class="timeline">
+                <div class="step completed" id="step-1">
+                    <div class="step-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3>Commande Confirmée</h3>
+                        <p>Votre paiement a été validé et votre commande est enregistrée dans nos systèmes.</p>
+                    </div>
+                </div>
+                
+                <div class="step active" id="step-2">
+                    <div class="step-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3>En cours de préparation</h3>
+                        <p>Notre atelier prépare vos pièces avec le plus grand soin. Emballage en cours.</p>
+                    </div>
+                </div>
+                
+                <div class="step" id="step-3">
+                    <div class="step-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3>Expédiée</h3>
+                        <p>Votre colis a été remis au transporteur. Un numéro de suivi colis vous sera envoyé par e-mail.</p>
+                    </div>
+                </div>
+                
+                <div class="step" id="step-4">
+                    <div class="step-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3>Livrée</h3>
+                        <p>Votre colis a été livré à votre adresse.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function trackOrder() {
+            const orderId = document.getElementById('order-id').value.trim();
+            const email = document.getElementById('order-email').value.trim();
+            const errorMsg = document.getElementById('error-msg');
+            const resultBox = document.getElementById('tracking-result');
+
+            errorMsg.style.display = 'none';
+            resultBox.style.display = 'none';
+
+            if(!orderId || !email) return;
+            
+            const btn = document.querySelector('.btn-luxury');
+            const originalText = btn.textContent;
+            btn.innerHTML = 'RECHERCHE...';
+
+            try {
+                // Appel au vrai Backend Python !
+                const response = await fetch('http://localhost:8083/track-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: orderId, email: email })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('res-id').textContent = orderId;
+                    document.getElementById('res-date').textContent = data.date;
+                    
+                    // Statut (1: Confirmé, 2: Préparation, 3: Expédié, 4: Livré)
+                    let currentStep = data.status || 1; 
+
+                    for(let i=1; i<=4; i++) {
+                        const stepEl = document.getElementById('step-'+i);
+                        stepEl.className = 'step';
+                        if (i < currentStep) stepEl.classList.add('completed');
+                        if (i === currentStep) stepEl.classList.add('active');
+                    }
+
+                    resultBox.style.display = 'block';
+                } else {
+                    // Pour la démo visuelle si le backend n'est pas rempli
+                    if (orderId === 'NRM-DEMO') {
+                        document.getElementById('res-id').textContent = 'NRM-DEMO';
+                        document.getElementById('res-date').textContent = new Date().toLocaleDateString('fr-FR');
+                        document.getElementById('step-2').classList.add('active');
+                        document.getElementById('step-1').classList.add('completed');
+                        resultBox.style.display = 'block';
+                    } else {
+                        errorMsg.style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                errorMsg.style.display = 'block';
+            }
+            
+            btn.textContent = originalText;
+        }
+    </script>
+</body>
+</html>

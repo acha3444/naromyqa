@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Compte | Naromyqa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background-color: var(--background);">
+
+    <!-- Navbar -->
+    <nav class="navbar" style="background: var(--surface);">
+        <div class="nav-brand">
+            <a href="index.html" class="logo">NAROMYQA</a>
+        </div>
+        <div class="nav-links">
+            <a href="boutique.html" class="nav-link">Boutique</a>
+            <a href="#" class="nav-link">Collections</a>
+            <a href="#" class="nav-link">Notre Histoire</a>
+        </div>
+        <div class="nav-actions">
+            <a href="login.html" class="btn-primary" id="nav-auth-btn">S'inscrire / Se connecter</a>
+            <button class="cart-btn" onclick="document.getElementById('cart-sidebar').classList.add('active')">
+                Panier (<span id="cart-count">0</span>)
+            </button>
+        </div>
+    </nav>
+
+    <!-- Account Dashboard -->
+    <section class="account-dashboard fade-in-up visible" style="padding: 120px 5% 80px 5%; max-width: 1200px; margin: 0 auto; min-height: 80vh;">
+        <div class="account-header" style="text-align: center; margin-bottom: 4rem;">
+            <h1 style="font-family: 'Cinzel', serif; font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-primary);">Mon Espace Personnel</h1>
+            <p style="color: var(--text-secondary);">Gérez vos informations, vos commandes et vos préférences de compte.</p>
+        </div>
+
+        <div class="account-grid" style="display: grid; grid-template-columns: 250px 1fr; gap: 4rem;">
+            <!-- Sidebar Navigation -->
+            <aside class="account-sidebar" style="border-right: 1px solid #eee; padding-right: 2rem;">
+                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <li><a href="#" class="account-tab active" data-target="tab-infos">Mes Informations</a></li>
+                    <li><a href="#" class="account-tab" data-target="tab-orders">Mes Commandes</a></li>
+                    <li><a href="#" class="account-tab" data-target="tab-addresses">Carnet d'Adresses</a></li>
+                    <li><a href="#" class="account-tab" data-target="tab-settings">Paramètres</a></li>
+                    <li style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                        <a href="#" id="logout-btn" class="account-tab" style="color: #d9534f; display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            Se déconnecter
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="account-content">
+                <!-- Tab: Informations -->
+                <div id="tab-infos" class="account-panel active">
+                    <h2 style="font-family: 'Cinzel', serif; margin-bottom: 2rem; font-size: 1.8rem; color: var(--text-primary);">Mes Informations Personnelles</h2>
+                    <form id="profile-form" class="auth-form" style="max-width: 550px; background: transparent; padding: 0; box-shadow: none;">
+                        <div id="profile-msg" style="display:none; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px; background: #e8f5e9; color: #2e7d32; font-size: 0.9rem;"></div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="profile-firstname" style="color: var(--text-secondary); font-size: 0.9rem;">Prénom</label>
+                                <input type="text" id="profile-firstname" placeholder="Ex: Amina" style="background: var(--surface); border: 1px solid #ddd;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="profile-lastname" style="color: var(--text-secondary); font-size: 0.9rem;">Nom</label>
+                                <input type="text" id="profile-lastname" placeholder="Ex: Benali" style="background: var(--surface); border: 1px solid #ddd;">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label for="profile-email" style="color: var(--text-secondary); font-size: 0.9rem;">Adresse e-mail (Lecture seule)</label>
+                            <input type="email" id="profile-email" disabled style="background: #f5f5f5; border: 1px solid #ddd; color: #888; cursor: not-allowed;">
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <label for="profile-phone" style="color: var(--text-secondary); font-size: 0.9rem;">Numéro de téléphone</label>
+                            <input type="tel" id="profile-phone" placeholder="+33 6 12 34 56 78" style="background: var(--surface); border: 1px solid #ddd;">
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" id="profile-submit" style="padding: 12px 24px;">Enregistrer les modifications</button>
+                    </form>
+                </div>
+
+                <!-- Tab: Orders -->
+                <div id="tab-orders" class="account-panel" style="display: none;">
+                    <h2 style="font-family: 'Cinzel', serif; margin-bottom: 2rem; font-size: 1.8rem; color: var(--text-primary);">Historique de mes commandes</h2>
+                    <div style="text-align: center; padding: 4rem 2rem; background: var(--surface); border-radius: 8px; border: 1px dashed #ccc;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.2" style="margin-bottom: 1rem;">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <h3 style="margin-bottom: 0.5rem; color: var(--text-primary); font-weight: 500;">Aucune commande pour le moment</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">Découvrez nos collections et laissez-vous tenter par l'élégance intemporelle Naromyqa.</p>
+                        <a href="boutique.html" class="btn-primary" style="padding: 10px 24px;">Découvrir la boutique</a>
+                    </div>
+                </div>
+
+                <!-- Tab: Addresses -->
+                <div id="tab-addresses" class="account-panel" style="display: none;">
+                    <h2 style="font-family: 'Cinzel', serif; margin-bottom: 2rem; font-size: 1.8rem; color: var(--text-primary);">Mon Carnet d'Adresses</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div style="border: 1px solid #eee; padding: 2rem; border-radius: 8px; background: var(--surface);">
+                            <h3 style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 1.1rem; color: var(--text-primary);">
+                                Adresse Principale 
+                                <span style="font-size: 0.75rem; background: var(--primary); color: white; padding: 4px 10px; border-radius: 12px; font-weight: normal; letter-spacing: 0.5px;">PAR DÉFAUT</span>
+                            </h3>
+                            <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                                <strong>Amina Benali</strong><br>
+                                12 Avenue des Champs-Élysées<br>
+                                75008 Paris<br>
+                                France<br>
+                                +33 6 12 34 56 78
+                            </p>
+                            <a href="#" style="color: var(--text-primary); text-decoration: underline; font-size: 0.9rem;">Modifier l'adresse</a>
+                        </div>
+                        <div style="border: 1px dashed #ccc; padding: 2rem; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1rem; color: var(--text-secondary);"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <h3 style="font-size: 1.05rem; color: var(--text-secondary); font-weight: 500;">Ajouter une nouvelle adresse</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Settings -->
+                <div id="tab-settings" class="account-panel" style="display: none;">
+                    <h2 style="font-family: 'Cinzel', serif; margin-bottom: 2rem; font-size: 1.8rem; color: var(--text-primary);">Paramètres du compte</h2>
+                    
+                    <div style="margin-bottom: 3rem; background: var(--surface); padding: 2rem; border-radius: 8px; border: 1px solid #eee;">
+                        <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">Préférences de communication</h3>
+                        <label style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1.5rem; cursor: pointer;">
+                            <input type="checkbox" checked style="width: 18px; height: 18px; margin-top: 3px; accent-color: var(--primary);">
+                            <div>
+                                <span style="display: block; font-weight: 500; margin-bottom: 4px;">Offres & Nouveautés</span>
+                                <span style="color: var(--text-secondary); font-size: 0.9rem;">Recevoir nos offres exclusives et être alertée des nouvelles collections par e-mail.</span>
+                            </div>
+                        </label>
+                        <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" checked style="width: 18px; height: 18px; margin-top: 3px; accent-color: var(--primary);">
+                            <div>
+                                <span style="display: block; font-weight: 500; margin-bottom: 4px;">Suivi SMS</span>
+                                <span style="color: var(--text-secondary); font-size: 0.9rem;">Recevoir des notifications par SMS pour suivre l'expédition de vos commandes.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div style="border-top: 1px solid #eee; padding-top: 2rem;">
+                        <h3 style="margin-bottom: 1rem; color: #d9534f; font-size: 1.1rem;">Zone de danger</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">Une fois votre compte supprimé, toutes vos données (historique de commandes, adresses) seront perdues définitivement. Cette action est irréversible.</p>
+                        <button class="btn-primary" style="background: transparent; border: 1px solid #d9534f; color: #d9534f; padding: 10px 20px;">Supprimer définitivement mon compte</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- UI Logic Scripts -->
+    <script src="auth.js?v=6"></script>
+    <script src="script.js?v=6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Logique de navigation entre les onglets du tableau de bord
+            const tabs = document.querySelectorAll('.account-tab[data-target]');
+            const panels = document.querySelectorAll('.account-panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // On retire l'état "actif" partout
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panels.forEach(p => p.style.display = 'none');
+                    
+                    // On active l'onglet cliqué
+                    tab.classList.add('active');
+                    const targetId = tab.getAttribute('data-target');
+                    const targetPanel = document.getElementById(targetId);
+                    
+                    if(targetPanel) {
+                        targetPanel.style.display = 'block';
+                        // Relance l'animation css simple
+                        targetPanel.style.animation = 'none';
+                        targetPanel.offsetHeight; // trigger reflow
+                        targetPanel.style.animation = 'fadeIn 0.3s ease-out';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

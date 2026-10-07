@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khimar | Naromyqa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="product-page-layout">
+    <nav class="navbar">
+        <a href="index.html" class="logo">NAROMYQA</a>
+        <ul class="nav-links">
+            <li><a href="index.html#valeurs">Nos Valeurs</a></li>
+            <li><a href="boutique.html">Boutique</a></li>
+            <li><a href="index.html#collection">Collection</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a href="#" class="cart-toggle" id="cart-btn">Panier (<span id="cart-count">0</span>)</a>
+            <a href="login.html" class="btn-primary" id="nav-auth-btn">S'inscrire / Se connecter</a>
+        </div>
+    </nav>
+
+    <main class="product-detail-container">
+        <nav class="breadcrumbs fade-in-up">
+            <a href="index.html">Accueil</a> > <a href="boutique.html">Boutique</a> > <span id="bread-title">Khimar Noir Signature</span>
+        </nav>
+
+        <div class="product-detail-grid">
+            <div class="product-gallery fade-in-up">
+                <img id="main-product-image" src="assets/khimar-noir.jpg" alt="Khimar">
+            </div>
+            
+            <div class="product-info-panel fade-in-up delay-1">
+                <h1 id="product-title">Khimar Noir Signature</h1>
+                <p class="product-price-large" id="product-price">34,90 €</p>
+                <p class="klarna-promo">Payez en 3x sans frais avec <strong>Klarna</strong>.</p>
+
+                <div class="product-description">
+                    <p>Un khimar légiféré d'une élégance rare, confectionné dans une Soie de Médine premium. Son retombé fluide et son opacité totale en font une pièce maîtresse pour votre quotidien.</p>
+                </div>
+
+                <div class="product-options">
+                    <p class="option-label">Couleur : <strong id="color-name">Noir</strong></p>
+                    <div class="color-selectors">
+                        <button class="color-btn active" data-color="noir" data-img="assets/khimar-noir.jpg" data-title="Khimar Noir Signature" style="background-color: #1a1a1a;" title="Noir"></button>
+                        <button class="color-btn" data-color="bleu" data-img="assets/khimar-bleu.jpg" data-title="Khimar Bleu Royal" style="background-color: #1a233a;" title="Bleu Royal"></button>
+                        <button class="color-btn" data-color="bordeaux" data-img="assets/khimar-bordeaux.jpg" data-title="Khimar Bordeaux Profond" style="background-color: #4a151c;" title="Bordeaux"></button>
+                        <button class="color-btn" data-color="gris" data-img="assets/khimar-gris.jpg" data-title="Khimar Anthracite" style="background-color: #4a4a4a;" title="Anthracite"></button>
+                    </div>
+                </div>
+
+                <div class="add-to-cart-wrapper">
+                    <div class="qty-selector">
+                        <button id="detail-minus">-</button>
+                        <input type="text" id="detail-qty" value="1" readonly>
+                        <button id="detail-plus">+</button>
+                    </div>
+                    <button class="btn-primary w-100 detail-add-btn" id="detail-add-cart">AJOUTER AU PANIER</button>
+                </div>
+                
+                <div class="product-perks">
+                    <div class="perk">📦 <span>Expédition sous 24h</span></div>
+                    <div class="perk">✨ <span>Soie de Médine Premium</span></div>
+                    <div class="perk">🔄 <span>Retours sous 14 jours</span></div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <button class="accordion-header">Description & Détails <span class="acc-icon">+</span></button>
+                        <div class="accordion-content">
+                            <ul style="padding-left:1.2rem; margin-top:1rem;">
+                                <li>Tissu : Soie de Médine très fluide</li>
+                                <li>Opacité : 100%</li>
+                                <li>Longueur avant : 95cm</li>
+                                <li>Longueur arrière : 135cm</li>
+                                <li>Finition pointe, idéal toutes saisons</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header">Livraison & Retours <span class="acc-icon">+</span></button>
+                        <div class="accordion-content">
+                            <p style="margin-top:1rem;">Livraison offerte à partir de 80€ d'achat en France métropolitaine.<br><br>Vous disposez d'un délai de 14 jours après réception pour retourner votre commande (articles non portés dans leur emballage d'origine).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- STICKY CART BAR -->
+    <div id="sticky-cart-bar" class="sticky-cart-bar">
+        <div class="sticky-product-info">
+            <img src="assets/khimar-noir.jpg" alt="Khimar" id="sticky-img">
+            <div>
+                <h4 id="sticky-title">Khimar Soie de Médine</h4>
+                <p>34,90 €</p>
+            </div>
+        </div>
+        <button class="btn-primary" id="sticky-add-btn" style="padding: 10px 24px; display:flex; align-items:center; gap:8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            Ajouter
+        </button>
+    </div>
+
+    <footer class="footer" style="margin-top: 5rem;">
+        <div class="footer-bottom">
+            <div class="logo">NAROMYQA</div>
+            <div class="footer-links" style="display:flex; gap:15px; margin: 15px 0;">
+                <a href="#">Instagram</a>
+                <a href="suivi.html">Suivi de commande</a>
+                <a href="#">Contact</a>
+            </div>
+            <p class="copyright">© 2026 Naromyqa. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Panier (Sidebar) -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h2>Votre Panier</h2>
+            <button class="close-cart" id="close-cart">&times;</button>
+        </div>
+        <div class="shipping-bar-container">
+            <p id="shipping-message">Livraison gratuite à partir de <strong>80 €</strong></p>
+            <div class="shipping-progress">
+                <div class="shipping-progress-fill" id="shipping-progress-fill"></div>
+            </div>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- Items injectés via JS -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-reassurance">
+                <span>🔒 Paiement sécurisé</span>
+                <span>📦 Expédition 24/48h</span>
+            </div>
+            <div class="cart-total">
+                <span>TOTAL</span>
+                <span id="cart-total-price">0,00 €</span>
+            </div>
+            <button class="btn-primary w-100 checkout-btn" onclick="window.location.href='checkout.html'" style="width:100%; font-size:1.1rem; padding:1rem; letter-spacing:1px; display:flex; justify-content:center; align-items:center; gap:10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                PASSER À LA CAISSE
+            </button>
+            <div class="payment-methods">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" height="15" style="margin-right:10px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" height="15">
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js?v=3"></script>
+    <script src="script.js?v=3"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const colorParam = urlParams.get('color');
+            
+            const mainImg = document.getElementById('main-product-image');
+            const titleEl = document.getElementById('product-title');
+            const breadTitle = document.getElementById('bread-title');
+            const colorLabel = document.getElementById('color-name');
+            const colorBtns = document.querySelectorAll('.color-btn');
+
+            function updateProduct(btn) {
+                colorBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const color = btn.getAttribute('data-color');
+                const img = btn.getAttribute('data-img');
+                const title = btn.getAttribute('data-title');
+
+                mainImg.src = img;
+                titleEl.textContent = title;
+                breadTitle.textContent = title;
+                colorLabel.textContent = title.replace('Khimar ', '').replace('Signature', '').trim();
+                
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('color', color);
+                window.history.pushState({}, '', newUrl);
+            }
+
+            if(colorParam) {
+                const targetBtn = Array.from(colorBtns).find(b => b.getAttribute('data-color') === colorParam);
+                if(targetBtn) updateProduct(targetBtn);
+            }
+
+            colorBtns.forEach(btn => {
+                btn.addEventListener('click', () => updateProduct(btn));
+            });
+
+            document.querySelectorAll('.accordion-header').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const content = btn.nextElementSibling;
+                    const icon = btn.querySelector('.acc-icon');
+                    if(content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.textContent = '+';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.textContent = '-';
+                    }
+                });
+            });
+
+            const qtyInput = document.getElementById('detail-qty');
+            document.getElementById('detail-minus').addEventListener('click', () => {
+                if(qtyInput.value > 1) qtyInput.value--;
+            });
+            document.getElementById('detail-plus').addEventListener('click', () => {
+                qtyInput.value++;
+            });
+
+            const addBtn = document.getElementById('detail-add-cart');
+            addBtn.addEventListener('click', () => {
+                const name = titleEl.textContent;
+                const price = 34.90;
+                const image = mainImg.src;
+                const qty = parseInt(qtyInput.value);
+
+                window.addToCartGlobal(name, price, image, qty);
+                
+                const orig = addBtn.textContent;
+                addBtn.textContent = 'Ajouté ✓';
+                addBtn.style.background = '#4CAF50';
+                addBtn.style.borderColor = '#4CAF50';
+                addBtn.style.color = '#fff';
+                setTimeout(() => {
+                    addBtn.textContent = orig;
+                    addBtn.style.background = '';
+                    addBtn.style.borderColor = '';
+                    addBtn.style.color = '';
+                }, 1500);
+            });
+            
+            // Gestion de la barre Sticky Add To Cart
+            const stickyAddBtn = document.getElementById('sticky-add-btn');
+            if (stickyAddBtn) {
+                stickyAddBtn.addEventListener('click', () => {
+                    const name = titleEl.textContent;
+                    const price = 34.90;
+                    const image = mainImg.src;
+                    const qty = parseInt(qtyInput.value);
+                    window.addToCartGlobal(name, price, image, qty);
+                });
+            }
+
+            window.addEventListener('scroll', () => {
+                const mainAddToCart = document.getElementById('detail-add-cart');
+                const stickyBar = document.getElementById('sticky-cart-bar');
+                if (mainAddToCart && stickyBar) {
+                    const rect = mainAddToCart.getBoundingClientRect();
+                    if (rect.bottom < 0) {
+                        stickyBar.classList.add('visible');
+                    } else {
+                        stickyBar.classList.remove('visible');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

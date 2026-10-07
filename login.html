@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | Naromyqa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="auth-page">
+    <nav class="navbar" style="position: absolute; width:100%; background:transparent; border:none; top:0;">
+        <a href="index.html" class="logo" style="color:var(--text-primary)">NAROMYQA</a>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-box">
+            <h1 id="auth-title">Bon retour</h1>
+            <p id="auth-subtitle">Connectez-vous pour accéder à votre espace.</p>
+            
+            <div id="auth-error" class="auth-error" style="display:none;"></div>
+            <div id="auth-success" class="auth-success" style="display:none;"></div>
+
+            <form id="auth-form" class="auth-form">
+                <!-- Nouveaux champs affichés uniquement pour l'inscription -->
+                <div class="signup-only" style="display: none;">
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="firstname">Prénom</label>
+                            <input type="text" id="firstname" placeholder="Ex: Amina">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="lastname">Nom</label>
+                            <input type="text" id="lastname" placeholder="Ex: Benali">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Adresse e-mail</label>
+                    <input type="email" id="email" required placeholder="vous@exemple.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary w-100" id="auth-submit-btn">SE CONNECTER</button>
+            </form>
+            
+            <div class="auth-switch">
+                <p><span id="auth-switch-text-node">Pas encore de compte ? </span><a href="#" id="toggle-auth">Créer un compte</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js?v=5"></script>
+</body>
+</html>
