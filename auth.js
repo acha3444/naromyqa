@@ -128,6 +128,17 @@ function initAuthLogic() {
                         return;
                     }
                     
+                    // --- NOUVEAU : Alerter Klaviyo pour le mail de bienvenue ---
+                    try {
+                        await fetch('http://localhost:8083/welcome-event', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: email, first_name: firstName })
+                        });
+                    } catch (e) {
+                        console.error("Impossible de notifier Klaviyo de la création de compte", e);
+                    }
+                    
                     successDiv.textContent = "Inscription réussie ! Connexion en cours...";
                     successDiv.style.display = 'block';
                     setTimeout(() => window.location.href = 'index.html', 1500);

@@ -78,6 +78,51 @@ def send_confirmation_email(order_id, user_email, amount):
     except Exception as e:
         print(f"[KLAVIYO] Erreur lors de l'envoi à Klaviyo: {e}")
 
+def send_welcome_event(user_email, first_name):
+    if KLAVIYO_PRIVATE_KEY == "votre_cle_api_privee_klaviyo":
+        print(f"[KLAVIYO] Simulation: Événement 'Account Created' envoyé pour {user_email}")
+        return
+        
+    try:
+        url = 'https://a.klaviyo.com/api/events/'
+        payload = {
+            "data": {
+                "type": "event",
+                "attributes": {
+                    "profile": {
+                        "data": {
+                            "type": "profile",
+                            "attributes": {
+                                "email": user_email,
+                                "first_name": first_name
+                            }
+                        }
+                    },
+                    "metric": {
+                        "data": {
+                            "type": "metric",
+                            "attributes": {
+                                "name": "Account Created"
+                            }
+                        }
+                    },
+                    "properties": {
+                        "AccountType": "Customer"
+                    }
+                }
+            }
+        }
+        
+        req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'))
+        req.add_header('Authorization', f'Klaviyo-API-Key {KLAVIYO_PRIVATE_KEY}')
+        req.add_header('Content-Type', 'application/json')
+        req.add_header('revision', '2023-12-15')
+        
+        urllib.request.urlopen(req)
+        print(f"[KLAVIYO] Succès: Événement 'Account Created' envoyé pour {user_email}.")
+    except Exception as e:
+        print(f"[KLAVIYO] Erreur lors de l'envoi de l'événement de bienvenue: {e}")
+
 def create_sendcloud_parcel(order_id, email, shipping):
     if SENDCLOUD_PUBLIC == "votre_cle_publique_sendcloud":
         print(f"[SENDCLOUD] ⚠️ Colis non créé: Identifiants Sendcloud manquants.")
@@ -223,6 +268,21 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({'orderId': order_id}).encode('utf-8'))
+            
+        elif self.path == '/welcome-event':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data)
+            
+            email = data.get('email', '')
+            first_name = data.get('first_name', '')
+            
+            send_welcome_event(email, first_name)
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'status': 'ok'}).encode('utf-8'))
             
         elif self.path == '/track-order':
             content_length = int(self.headers['Content-Length'])
