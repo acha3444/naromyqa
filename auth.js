@@ -130,7 +130,7 @@ function initAuthLogic() {
                     
                     // --- NOUVEAU : Alerter Klaviyo pour le mail de bienvenue ---
                     try {
-                        await fetch('http://localhost:8083/welcome-event', {
+                        await fetch('https://naromyqa-backend.onrender.com/welcome-event', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ email: email, first_name: firstName })
