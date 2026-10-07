@@ -34,58 +34,10 @@
     </header>
 
     <main class="shop-container">
-        <div class="product-grid">
-            <!-- Product 1 -->
-            <div class="product-card fade-in-up delay-1">
-                <div class="product-image">
-                    <a href="produit.html?color=noir"><img src="assets/khimar-noir.jpg" alt="Khimar Noir"></a>
-                    <span class="badge">Best-seller</span>
-                </div>
-                <div class="product-info">
-                    <a href="produit.html?color=noir" class="product-link"><h3>Khimar Noir Signature</h3></a>
-                    <p class="product-material">Soie de Médine</p>
-                    <p class="product-price">34,90 €</p>
-                    <button class="btn-secondary add-to-cart">Ajouter au panier</button>
-                </div>
-            </div>
-
-            <!-- Product 2 -->
-            <div class="product-card fade-in-up delay-1">
-                <div class="product-image">
-                    <a href="produit.html?color=bleu"><img src="assets/khimar-bleu.jpg" alt="Khimar Bleu"></a>
-                </div>
-                <div class="product-info">
-                    <a href="produit.html?color=bleu" class="product-link"><h3>Khimar Bleu Royal</h3></a>
-                    <p class="product-material">Soie de Médine</p>
-                    <p class="product-price">34,90 €</p>
-                    <button class="btn-secondary add-to-cart">Ajouter au panier</button>
-                </div>
-            </div>
-
-            <!-- Product 3 -->
-            <div class="product-card fade-in-up delay-2">
-                <div class="product-image">
-                    <a href="produit.html?color=bordeaux"><img src="assets/khimar-bordeaux.jpg" alt="Khimar Bordeaux"></a>
-                </div>
-                <div class="product-info">
-                    <a href="produit.html?color=bordeaux" class="product-link"><h3>Khimar Bordeaux Profond</h3></a>
-                    <p class="product-material">Soie de Médine</p>
-                    <p class="product-price">34,90 €</p>
-                    <button class="btn-secondary add-to-cart">Ajouter au panier</button>
-                </div>
-            </div>
-
-            <!-- Product 4 -->
-            <div class="product-card fade-in-up delay-2">
-                <div class="product-image">
-                    <a href="produit.html?color=gris"><img src="assets/khimar-gris.jpg" alt="Khimar Gris"></a>
-                </div>
-                <div class="product-info">
-                    <a href="produit.html?color=gris" class="product-link"><h3>Khimar Anthracite</h3></a>
-                    <p class="product-material">Soie de Médine</p>
-                    <p class="product-price">34,90 €</p>
-                    <button class="btn-secondary add-to-cart">Ajouter au panier</button>
-                </div>
+        <div class="product-grid" id="dynamic-product-grid">
+            <!-- Loader pendant la synchronisation Stripe -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 4rem 0; font-family: 'Cinzel', serif; color: var(--accent);">
+                Chargement de la collection depuis Stripe...
             </div>
         </div>
     </main>
@@ -140,5 +92,66 @@
 
     <script src="auth.js?v=3"></script>
     <script src="script.js?v=3"></script>
+    <script>
+        // Synchronisation du catalogue avec Stripe
+        document.addEventListener('DOMContentLoaded', async () => {
+            const grid = document.getElementById('dynamic-product-grid');
+            if(!grid) return;
+            
+            try {
+                const response = await fetch('http://localhost:8083/products');
+                const products = await response.json();
+                
+                if (products.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem 0;">Aucun produit actif trouvé sur votre compte Stripe. Allez en créer un !</div>';
+                    return;
+                }
+                
+                grid.innerHTML = ''; // On vide le loader
+                
+                products.forEach((p, index) => {
+                    const delay = index % 2 === 0 ? 'delay-1' : 'delay-2';
+                    const formattedPrice = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(p.price);
+                    
+                    const card = document.createElement('div');
+                    card.className = `product-card fade-in-up ${delay}`;
+                    card.innerHTML = `
+                        <div class="product-image">
+                            <img src="${p.image}" alt="${p.name}">
+                        </div>
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <p class="product-material">${p.description || 'Naromyqa Signature'}</p>
+                            <p class="product-price">${formattedPrice}</p>
+                            <button class="btn-secondary add-to-cart" data-name="${p.name}" data-price="${p.price}" data-image="${p.image}">Ajouter au panier</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                
+                // On réattache les écouteurs du panier aux nouveaux boutons
+                if(typeof attachCartListeners === 'function') {
+                    attachCartListeners();
+                } else {
+                    // Fallback manuel au cas où la fonction globale n'est pas exposée
+                    document.querySelectorAll('.add-to-cart').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const name = e.target.dataset.name;
+                            const price = parseFloat(e.target.dataset.price);
+                            const img = e.target.dataset.image;
+                            if(typeof addToCart === 'function') {
+                                addToCart(name, price, img);
+                                if(typeof openCart === 'function') openCart();
+                            }
+                        });
+                    });
+                }
+                
+            } catch (err) {
+                console.error("Erreur Stripe:", err);
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem 0; color: red;">Erreur de connexion avec Stripe. Le serveur Python (localhost:8083) est-il démarré ?</div>';
+            }
+        });
+    </script>
 </body>
 </html>

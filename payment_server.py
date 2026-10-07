@@ -122,6 +122,46 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
         self.send_response(200, "ok")
         self.end_headers()
 
+    def do_GET(self):
+        if self.path == '/products':
+            url = 'https://api.stripe.com/v1/products?active=true&expand[]=data.default_price'
+            req = urllib.request.Request(url)
+            auth_str = f"{STRIPE_SECRET_KEY}:"
+            auth_b64 = base64.b64encode(auth_str.encode('ascii')).decode('ascii')
+            req.add_header('Authorization', f'Basic {auth_b64}')
+            
+            try:
+                response = urllib.request.urlopen(req)
+                resp_data = json.loads(response.read())
+                
+                products = []
+                for p in resp_data.get('data', []):
+                    price_obj = p.get('default_price')
+                    if price_obj and not isinstance(price_obj, str):
+                        price = price_obj.get('unit_amount', 0) / 100.0
+                    else:
+                        price = 0
+                        
+                    image = p.get('images')[0] if p.get('images') else 'assets/khimar-noir.jpg'
+                    
+                    products.append({
+                        'id': p.get('id'),
+                        'name': p.get('name'),
+                        'description': p.get('description'),
+                        'price': price,
+                        'image': image
+                    })
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(products).encode('utf-8'))
+            except Exception as e:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+
     def do_POST(self):
         if self.path == '/create-payment-intent':
             content_length = int(self.headers['Content-Length'])
