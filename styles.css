@@ -14,13 +14,19 @@
     box-sizing: border-box;
 }
 
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     font-family: 'Lato', sans-serif;
     line-height: 1.6;
-    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    position: relative;
 }
 
 h1, h2, h3, .logo, .eyebrow {
@@ -1120,6 +1126,8 @@ a {
         -webkit-overflow-scrolling: touch;
         justify-content: flex-start; /* Aligné à gauche pour scroller vers la droite */
         scrollbar-width: none; /* Cache la barre de défilement (Firefox) */
+        width: 100%;
+        max-width: 100vw;
     }
     .trust-bar::-webkit-scrollbar {
         display: none; /* Cache la barre de défilement (Chrome/Safari) */
@@ -1143,6 +1151,8 @@ a {
         scrollbar-width: none;
         gap: 1.5rem;
         padding-bottom: 1rem;
+        width: 100%;
+        max-width: 100vw;
     }
     .features-grid::-webkit-scrollbar, .gallery-grid::-webkit-scrollbar {
         display: none;
