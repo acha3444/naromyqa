@@ -19,6 +19,11 @@
     box-sizing: border-box;
 }
 
+::selection {
+    background: var(--accent);
+    color: var(--surface);
+}
+
 html, body {
     overflow-x: hidden;
     width: 100%;
@@ -911,7 +916,7 @@ a {
     color: var(--text-primary);
 }
 .account-tab.active {
-    background: #f9f9f9;
+    background: var(--tab-hover-bg);
     color: var(--text-primary);
     border-left: 3px solid var(--text-primary);
     font-weight: 500;
